@@ -6,7 +6,7 @@ Streaming server for Home Assistant using [Kyutai Pocket TTS](https://github.com
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-repo/wyoming_pocket_tts
+git clone https://github.com/mitrokun/wyoming_pocket_tts
 cd wyoming_pocket_tts
 
 # Create virtual environment
