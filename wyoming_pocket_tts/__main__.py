@@ -34,7 +34,7 @@ async def main() -> None:
         wyoming_voices.append(
             TtsVoice(
                 name=voice_id,
-                description=f"Pocket TTS preset voice: {voice_id}",
+                description=f"{voice_id}",
                 attribution=kyutai_attr,
                 installed=True,
                 version=__version__,
@@ -46,7 +46,7 @@ async def main() -> None:
         tts=[
             TtsProgram(
                 name="pocket-tts",
-                description="Pocket TTS - Fast CPU TTS Server",
+                description="Pocket TTS",
                 attribution=kyutai_attr,
                 installed=True,
                 version=__version__,
