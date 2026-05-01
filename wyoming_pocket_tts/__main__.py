@@ -12,20 +12,53 @@ from .handler import PocketTTSEventHandler
 _LOGGER = logging.getLogger(__name__)
 __version__ = "2.0.0"
 
-# Map short codes to internal model names
+# Remove the _24l suffix to switch to the smaller 6-layer model.
+# However, quality and stability will be reduced.
 LANGUAGE_MAP = {
     "en": "english",
     "fr": "french_24l",
     "de": "german_24l",
     "es": "spanish_24l",
-    "it": "italian",
-    "pt": "portuguese"
+    "it": "italian_24l",
+    "pt": "portuguese_24l"
 }
+
+def setup_logging(debug: bool):
+    """Configures logging to silence noisy third-party libraries."""
+    log_level = logging.DEBUG if debug else logging.INFO
+    
+    # Root logger set to WARNING to silence everything by default
+    logging.basicConfig(
+        level=logging.WARNING,
+        format="%(asctime)s %(levelname)s:%(name)s:%(message)s"
+    )
+
+    # Set our specific module loggers to INFO or DEBUG
+    # Note: Replace 'wyoming_pocket_tts' with your actual package folder name if different
+    logging.getLogger("wyoming_pocket_tts").setLevel(log_level)
+    logging.getLogger("__main__").setLevel(log_level)
+
+    # Silence specific noisy libraries unless in full debug mode
+    external_loggers = [
+        "httpx", 
+        "httpcore", 
+        "huggingface_hub", 
+        "torch", 
+        "urllib3", 
+        "pocket_tts"
+    ]
+    
+    for logger_name in external_loggers:
+        if debug:
+            logging.getLogger(logger_name).setLevel(logging.DEBUG)
+        else:
+            # In normal mode, we only want to see Errors or Warnings from these
+            logging.getLogger(logger_name).setLevel(logging.WARNING)
 
 async def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--uri", default="tcp://0.0.0.0:10202", help="Server URI")
-    parser.add_argument("--voice", default="alba", help="Default voice for synthesis")
+    parser.add_argument("--voice", default="alba", help="Default voice")
     parser.add_argument(
         "--language", 
         default="en", 
@@ -35,22 +68,18 @@ async def main() -> None:
     parser.add_argument(
         "--quantize", 
         action="store_true", 
-        help="Enable int8 quantization (faster on CPU, requires torchao)"
+        help="Enable int8 quantization"
     )
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     args = parser.parse_args()
 
-    logging.basicConfig(
-        level=logging.DEBUG if args.debug else logging.INFO, 
-        format="%(asctime)s %(levelname)s:%(name)s:%(message)s"
-    )
+    # Apply noise-filtering logging setup
+    setup_logging(args.debug)
 
-    # Initialize the engine with the mapped model name
     model_name = LANGUAGE_MAP[args.language]
     engine = PocketEngine(language=model_name, quantize=args.quantize) 
     await asyncio.to_thread(engine.load)
 
-    # Prepare Wyoming Info for Home Assistant
     kyutai_attr = Attribution(name="Kyutai", url="https://kyutai.org/")
     wyoming_voices = []
 
