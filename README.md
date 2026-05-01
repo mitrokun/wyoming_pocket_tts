@@ -21,7 +21,12 @@ pip install wyoming pocket-tts numpy soundfile sentence_stream
 
 ## Usage
 
-1. **Run the server**:
+**Run the server**:
    ```bash
    python3 -m wyoming_pocket_tts --uri tcp://0.0.0.0:10202
    ```
+The English model is downloaded by default. You can select a different (fr, de, it, es, pt) language using the `--language` option.
+   ```bash
+   python3 -m wyoming_pocket_tts --uri tcp://0.0.0.0:10202 --language it
+   ```
+   
